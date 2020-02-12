@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey_1">
+
+    <ImageView
+        android:id="@+id/iv_eraser"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:padding="8dp"
+        android:src="@drawable/eraser"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.richpath.RichPathView
+        android:id="@+id/anim_eraser"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:padding="6dp"
+        app:layout_constraintStart_toStartOf="@id/iv_eraser"
+        app:layout_constraintTop_toTopOf="@id/iv_eraser"
+        app:vector="@drawable/eraser" />
+
+    <ImageView
+        android:id="@+id/iv_undo"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="10dp"
+        android:padding="9dp"
+        android:src="@drawable/undo"
+        app:layout_constraintStart_toEndOf="@id/iv_eraser"
+        app:layout_constraintTop_toTopOf="@id/iv_eraser" />
+
+    <ImageView
+        android:id="@+id/iv_redo"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="10dp"
+        android:padding="9dp"
+        android:src="@drawable/redo"
+        app:layout_constraintStart_toEndOf="@id/iv_undo"
+        app:layout_constraintTop_toTopOf="@id/iv_undo" />
+
+    <ImageView
+        android:id="@+id/iv_trashcan"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="5dp"
+        android:padding="8dp"
+        android:src="@drawable/trash"
+        app:layout_constraintStart_toEndOf="@id/iv_redo"
+        app:layout_constraintTop_toTopOf="@id/iv_redo" />
+
+    <com.richpath.RichPathView
+        android:id="@+id/anim_trashcan"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:padding="6dp"
+        app:layout_constraintStart_toStartOf="@id/iv_trashcan"
+        app:layout_constraintTop_toTopOf="@id/iv_trashcan"
+        app:vector="@drawable/trash" />
+
+    <com.abbie.minipaint.view.paint.CanvasView
+        android:id="@+id/canvas"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        app:layout_constraintBottom_toTopOf="@id/cl_color_picker"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_eraser" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_color_picker"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_color_selected"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:src="@drawable/oval_solid_white"
+            app:layout_constraintEnd_toEndOf="@id/anim_ink"
+            app:layout_constraintTop_toTopOf="@id/anim_ink" />
+
+        <com.richpath.RichPathView
+            android:id="@+id/anim_ink"
+            android:layout_width="46dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="10dp"
+            android:padding="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:vector="@drawable/paint" />
+
+        <ImageView
+            android:id="@+id/iv_ink"
+            android:layout_width="46dp"
+            android:layout_height="45dp"
+            android:layout_marginStart="10dp"
+            android:padding="7.5dp"
+            android:src="@drawable/paint"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rl_color_list"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/anim_ink"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
