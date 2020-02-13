@@ -83,6 +83,11 @@ class PaintFragment : BaseFragment(), CanvasListener {
         }
         iv_undo.isEnabled = false
 
+        iv_redo.setOnClickListener {
+            canvas.redo()
+        }
+        iv_redo.isEnabled = false
+
         iv_trashcan.setOnClickListener {
             activeBtnTemporary(iv_trashcan, anim_trashcan)
             cleanConfirmDialog.show()
@@ -163,7 +168,8 @@ class PaintFragment : BaseFragment(), CanvasListener {
         iv_color_selected.imageTintList = ColorStateList.valueOf(color)
     }
 
-    override fun onListPaintPathChanged(size: Int) {
-        iv_undo.isEnabled = size > 0
+    override fun onListPaintPathChanged(undoCount: Int, redoCount: Int) {
+        iv_undo.isEnabled = undoCount > 0
+        iv_redo.isEnabled = redoCount > 0
     }
 }
