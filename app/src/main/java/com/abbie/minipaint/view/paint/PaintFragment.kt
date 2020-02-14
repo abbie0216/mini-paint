@@ -1,8 +1,14 @@
 package com.abbie.minipaint.view.paint
 
+import android.content.ContentResolver
+import android.content.ContentValues
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
@@ -14,8 +20,15 @@ import com.abbie.minipaint.R
 import com.abbie.minipaint.view.base.BaseFragment
 import com.afollestad.materialdialogs.MaterialDialog
 import com.richpath.RichPathView
+import com.richpathanimator.AnimationBuilder
 import com.richpathanimator.RichPathAnimator
 import kotlinx.android.synthetic.main.fragment_paint.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class PaintFragment : BaseFragment(), CanvasListener {
 
@@ -25,6 +38,12 @@ class PaintFragment : BaseFragment(), CanvasListener {
 
     private lateinit var currentIV: ImageView
     private lateinit var currentAnim: RichPathView
+
+    private lateinit var animInk: AnimationBuilder
+    private lateinit var animEraser: AnimationBuilder
+    private lateinit var animUpload: AnimationBuilder
+    private lateinit var animCover: AnimationBuilder
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -44,6 +63,7 @@ class PaintFragment : BaseFragment(), CanvasListener {
 
         // setup btn and animation
         setupAnimation()
+        animInk.start()
 
         currentIV = iv_ink
         currentAnim = anim_ink
@@ -51,10 +71,11 @@ class PaintFragment : BaseFragment(), CanvasListener {
         iv_ink.visibility = INVISIBLE
         anim_eraser.visibility = INVISIBLE
         anim_trashcan.visibility = INVISIBLE
+        anim_upload.visibility = INVISIBLE
 
-        val cleanConfirmDialog = MaterialDialog(context!!)
+        val cleanDialog = MaterialDialog(context!!)
             .title(null, "Alert")
-            .message(null, "!! The canvas will be deleted !!")
+            .message(null, "The canvas will be deleted !")
             .positiveButton(null, "Delete") {
                 canvas.clean()
                 inactiveBtnTemporary(iv_trashcan, anim_trashcan)
@@ -67,13 +88,27 @@ class PaintFragment : BaseFragment(), CanvasListener {
                 it.dismiss()
             }
 
+        val saveDialog = MaterialDialog(context!!)
+            .title(null, "Alert")
+            .message(null, "Save this canvas ?")
+            .positiveButton(null, "Save") {
+                saveCanvas(canvas.getBitmap())
+                inactiveBtnTemporary(iv_upload, anim_upload)
+                it.dismiss()
+            }
+            .negativeButton(null, "Cancel") {
+                inactiveBtnTemporary(iv_upload, anim_upload)
+                it.dismiss()
+            }
 
         iv_ink.setOnClickListener {
+            animInk.start()
             changeCurrentBtnStatus(iv_ink, anim_ink)
             canvas.usePen()
         }
 
         iv_eraser.setOnClickListener {
+            animEraser.start()
             changeCurrentBtnStatus(iv_eraser, anim_eraser)
             canvas.useEraser()
         }
@@ -88,16 +123,23 @@ class PaintFragment : BaseFragment(), CanvasListener {
         }
         iv_redo.isEnabled = false
 
+        iv_upload.setOnClickListener {
+            animUpload.start()
+            activeBtnTemporary(iv_upload, anim_upload)
+            saveDialog.show()
+        }
+
         iv_trashcan.setOnClickListener {
+            animCover.start()
             activeBtnTemporary(iv_trashcan, anim_trashcan)
-            cleanConfirmDialog.show()
+            cleanDialog.show()
         }
 
     }
 
     private fun setupAnimation() {
         val ink = anim_ink.findRichPathByName("ink")
-        RichPathAnimator.animate(ink)
+        animInk = RichPathAnimator.animate(ink)
             .startDelay(1000)
             .interpolator(LinearInterpolator())
             .fillColor(Color.TRANSPARENT, Color.BLACK)
@@ -110,11 +152,10 @@ class PaintFragment : BaseFragment(), CanvasListener {
             .duration(1500)
             .repeatMode(RichPathAnimator.RESTART)
             .repeatCount(RichPathAnimator.INFINITE)
-            .start()
 
         val eraser = anim_eraser.findRichPathByName("eraser")
         val line = anim_eraser.findRichPathByName("line")
-        RichPathAnimator.animate(eraser)
+        animEraser = RichPathAnimator.animate(eraser)
             .interpolator(DecelerateInterpolator())
             .translationX(0f, -10f, 0f)
             .duration(1000)
@@ -126,17 +167,19 @@ class PaintFragment : BaseFragment(), CanvasListener {
             .duration(1000)
             .repeatMode(RichPathAnimator.REVERSE)
             .repeatCount(RichPathAnimator.INFINITE)
-            .start()
+
+        val upload = anim_upload.findRichPathByName("upload")
+        animUpload = RichPathAnimator.animate(upload)
+            .interpolator(LinearInterpolator())
+            .translationY(0f, 5f, 0f, 5f)
+            .duration(1000)
 
         val cover = anim_trashcan.findRichPathByName("cover")
         cover?.isPivotToCenter = true
-        RichPathAnimator.animate(cover)
+        animCover = RichPathAnimator.animate(cover)
             .interpolator(DecelerateInterpolator())
-            .rotation(-10f, 0f, 10f, -5f, 5f)
+            .rotation(-10f, 0f, 10f, 0f, -5f, 0f, 5f, 0f)
             .duration(1000)
-            .repeatMode(RichPathAnimator.REVERSE)
-            .repeatCount(RichPathAnimator.INFINITE)
-            .start()
     }
 
     private fun changeCurrentBtnStatus(btnIv: ImageView, btnAnim: RichPathView) {
@@ -171,5 +214,33 @@ class PaintFragment : BaseFragment(), CanvasListener {
     override fun onListPaintPathChanged(undoCount: Int, redoCount: Int) {
         iv_undo.isEnabled = undoCount > 0
         iv_redo.isEnabled = redoCount > 0
+    }
+
+    @Throws(IOException::class)
+    private fun saveCanvas(bitmap: Bitmap) {
+        val simpleDateFormat = SimpleDateFormat("yyyyMMddhhmmss")
+        val name = simpleDateFormat.format(Date())
+
+        val fos: OutputStream?
+        fos = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val resolver: ContentResolver = context!!.contentResolver
+            val contentValues = ContentValues()
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "$name.jpg")
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpg")
+            contentValues.put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                Environment.DIRECTORY_PICTURES
+            )
+            val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            resolver.openOutputStream(imageUri!!)
+        } else {
+            val imagesDir =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    .toString()
+            val image = File(imagesDir, "$name.jpg")
+            FileOutputStream(image)
+        }
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+        fos?.close()
     }
 }

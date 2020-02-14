@@ -31,7 +31,7 @@ class SplashFragment : BaseFragment() {
 
     private fun onAllPermissionsGranted() {
         Timber.d("onAllPermissionsGranted")
-        Navigation.findNavController(view!!).navigate(R.id.action_splashFragment_to_homeFragment)
+        Navigation.findNavController(view!!).navigate(R.id.action_splashFragment_to_paintFragment)
     }
 
     private fun requestPermissions() {

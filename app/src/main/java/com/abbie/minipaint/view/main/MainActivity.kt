@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         when (Navigation.findNavController(this,
             R.id.nav_host_fragment
         ).currentDestination?.id) {
-            R.id.homeFragment -> finish()
+            R.id.paintFragment -> finish()
             else -> super.onBackPressed()
         }
     }

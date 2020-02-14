@@ -186,4 +186,6 @@ class CanvasView @JvmOverloads constructor(
         this.listener = listener
     }
 
+    fun getBitmap() = extraBitmap
+
 }

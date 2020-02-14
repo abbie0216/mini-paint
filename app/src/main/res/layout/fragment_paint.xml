@@ -46,14 +46,33 @@
         app:layout_constraintTop_toTopOf="@id/iv_undo" />
 
     <ImageView
+        android:id="@+id/iv_upload"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="5dp"
+        android:padding="9dp"
+        android:src="@drawable/upload"
+        app:layout_constraintStart_toEndOf="@id/iv_redo"
+        app:layout_constraintTop_toTopOf="@id/iv_redo" />
+
+    <com.richpath.RichPathView
+        android:id="@+id/anim_upload"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:padding="7dp"
+        app:layout_constraintStart_toStartOf="@id/iv_upload"
+        app:layout_constraintTop_toTopOf="@id/iv_upload"
+        app:vector="@drawable/upload" />
+
+    <ImageView
         android:id="@+id/iv_trashcan"
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_marginStart="5dp"
         android:padding="8dp"
         android:src="@drawable/trash"
-        app:layout_constraintStart_toEndOf="@id/iv_redo"
-        app:layout_constraintTop_toTopOf="@id/iv_redo" />
+        app:layout_constraintStart_toEndOf="@id/iv_upload"
+        app:layout_constraintTop_toTopOf="@id/iv_upload" />
 
     <com.richpath.RichPathView
         android:id="@+id/anim_trashcan"
