@@ -1,5 +1,6 @@
 package com.abbie.minipaint.view.paint
 
+import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.res.ColorStateList
@@ -15,6 +16,7 @@ import android.view.View.VISIBLE
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
+import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.abbie.minipaint.R
 import com.abbie.minipaint.view.base.BaseFragment
@@ -44,6 +46,43 @@ class PaintFragment : BaseFragment(), CanvasListener {
     private lateinit var animUpload: AnimationBuilder
     private lateinit var animCover: AnimationBuilder
 
+    private val cleanDialog = MaterialDialog(context!!)
+        .title(null, getString(R.string.alert))
+        .message(null, getString(R.string.dlg_msg_canvas_delete))
+        .positiveButton(null, getString(R.string.delete)) {
+            canvas.clean()
+            inactiveBtnTemporary(iv_trashcan, anim_trashcan)
+            changeCurrentBtnStatus(iv_ink, anim_ink)
+            canvas.usePen()
+        }
+        .negativeButton(null, getString(R.string.cancel)) {
+            inactiveBtnTemporary(iv_trashcan, anim_trashcan)
+        }
+        .cancelOnTouchOutside(false)
+
+    private val saveDialog = MaterialDialog(context!!)
+        .title(null, getString(R.string.alert))
+        .message(null, getString(R.string.dlg_msg_save_canvas))
+        .positiveButton(null, getString(R.string.yes)) {
+            saveCanvas(canvas.getBitmap())
+            inactiveBtnTemporary(iv_upload, anim_upload)
+        }
+        .negativeButton(null, getString(R.string.cancel)) {
+            inactiveBtnTemporary(iv_upload, anim_upload)
+        }
+        .cancelOnTouchOutside(false)
+
+    val backDialog = MaterialDialog(context!!)
+        .title(null, getString(R.string.alert))
+        .message(null, getString(R.string.dlg_msg_save_and_close_canvas))
+        .positiveButton(null, getString(R.string.yes)) {
+            saveCanvas(canvas.getBitmap())
+            requireActivity().finish()
+        }
+        .negativeButton(null, getString(R.string.just_close)) {
+            requireActivity().finish()
+        }
+        .cancelOnTouchOutside(false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -55,11 +94,11 @@ class PaintFragment : BaseFragment(), CanvasListener {
         layoutManager.orientation = LinearLayoutManager.HORIZONTAL
         rl_color_list.layoutManager = layoutManager
         rl_color_list.adapter = ColorPickerAdapter(context!!, colors, this)
+        iv_color_selected.imageTintList = ColorStateList.valueOf(Color.parseColor(colors[0]))
 
-        // setup initial draw color
+        // setup canvas
         canvas.setListener(this)
         canvas.changePenColor(Color.parseColor(colors[0]))
-        iv_color_selected.imageTintList = ColorStateList.valueOf(Color.parseColor(colors[0]))
 
         // setup btn and animation
         setupAnimation()
@@ -72,34 +111,6 @@ class PaintFragment : BaseFragment(), CanvasListener {
         anim_eraser.visibility = INVISIBLE
         anim_trashcan.visibility = INVISIBLE
         anim_upload.visibility = INVISIBLE
-
-        val cleanDialog = MaterialDialog(context!!)
-            .title(null, "Alert")
-            .message(null, "The canvas will be deleted !")
-            .positiveButton(null, "Delete") {
-                canvas.clean()
-                inactiveBtnTemporary(iv_trashcan, anim_trashcan)
-                changeCurrentBtnStatus(iv_ink, anim_ink)
-                canvas.usePen()
-                it.dismiss()
-            }
-            .negativeButton(null, "Cancel") {
-                inactiveBtnTemporary(iv_trashcan, anim_trashcan)
-                it.dismiss()
-            }
-
-        val saveDialog = MaterialDialog(context!!)
-            .title(null, "Alert")
-            .message(null, "Save this canvas ?")
-            .positiveButton(null, "Save") {
-                saveCanvas(canvas.getBitmap())
-                inactiveBtnTemporary(iv_upload, anim_upload)
-                it.dismiss()
-            }
-            .negativeButton(null, "Cancel") {
-                inactiveBtnTemporary(iv_upload, anim_upload)
-                it.dismiss()
-            }
 
         iv_ink.setOnClickListener {
             animInk.start()
@@ -135,6 +146,14 @@ class PaintFragment : BaseFragment(), CanvasListener {
             cleanDialog.show()
         }
 
+        // setup back pressed callback
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (iv_undo.isEnabled) backDialog.show()
+                else requireActivity().finish()
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(this, callback)
     }
 
     private fun setupAnimation() {
@@ -216,6 +235,7 @@ class PaintFragment : BaseFragment(), CanvasListener {
         iv_redo.isEnabled = redoCount > 0
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Throws(IOException::class)
     private fun saveCanvas(bitmap: Bitmap) {
         val simpleDateFormat = SimpleDateFormat("yyyyMMddhhmmss")
@@ -231,7 +251,8 @@ class PaintFragment : BaseFragment(), CanvasListener {
                 MediaStore.MediaColumns.RELATIVE_PATH,
                 Environment.DIRECTORY_PICTURES
             )
-            val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            val imageUri =
+                resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
             resolver.openOutputStream(imageUri!!)
         } else {
             val imagesDir =

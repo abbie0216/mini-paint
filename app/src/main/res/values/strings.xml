@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">mini-paint</string>
+    <string name="alert">Alert</string>
+    <string name="yes">Yes</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="just_close">Just Close</string>
+    <string name="dlg_msg_save_and_close_canvas">Save and Close this canvas ?</string>
+    <string name="dlg_msg_save_canvas">Save this canvas ?</string>
+    <string name="dlg_msg_canvas_delete">The canvas will be deleted !</string>
 </resources>
