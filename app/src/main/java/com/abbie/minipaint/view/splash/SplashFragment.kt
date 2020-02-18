@@ -4,10 +4,12 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
+import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.navigation.Navigation
 import com.abbie.minipaint.R
 import com.abbie.minipaint.view.base.BaseFragment
+import kotlinx.android.synthetic.main.fragment_splash.*
 import timber.log.Timber
 
 class SplashFragment : BaseFragment() {
@@ -31,7 +33,20 @@ class SplashFragment : BaseFragment() {
 
     private fun onAllPermissionsGranted() {
         Timber.d("onAllPermissionsGranted")
-        Navigation.findNavController(view!!).navigate(R.id.action_splashFragment_to_paintFragment)
+        motion_layout.setTransitionListener(object : MotionLayout.TransitionListener {
+            override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {}
+
+            override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {}
+
+            override fun onTransitionChange(p0: MotionLayout?, p1: Int, p2: Int, p3: Float) {
+            }
+
+            override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
+                Navigation.findNavController(view!!)
+                    .navigate(R.id.action_splashFragment_to_paintFragment)
+            }
+        })
+        motion_layout.transitionToEnd()
     }
 
     private fun requestPermissions() {
@@ -47,7 +62,8 @@ class SplashFragment : BaseFragment() {
         }
 
         if (requestList.size > 0) {
-            requestPermissions(requestList.toTypedArray(),
+            requestPermissions(
+                requestList.toTypedArray(),
                 PERMISSION_REQUEST_CODE
             )
         } else {

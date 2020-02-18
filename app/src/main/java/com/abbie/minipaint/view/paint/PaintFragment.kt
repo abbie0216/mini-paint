@@ -46,44 +46,6 @@ class PaintFragment : BaseFragment(), CanvasListener {
     private lateinit var animUpload: AnimationBuilder
     private lateinit var animCover: AnimationBuilder
 
-    private val cleanDialog = MaterialDialog(context!!)
-        .title(null, getString(R.string.alert))
-        .message(null, getString(R.string.dlg_msg_canvas_delete))
-        .positiveButton(null, getString(R.string.delete)) {
-            canvas.clean()
-            inactiveBtnTemporary(iv_trashcan, anim_trashcan)
-            changeCurrentBtnStatus(iv_ink, anim_ink)
-            canvas.usePen()
-        }
-        .negativeButton(null, getString(R.string.cancel)) {
-            inactiveBtnTemporary(iv_trashcan, anim_trashcan)
-        }
-        .cancelOnTouchOutside(false)
-
-    private val saveDialog = MaterialDialog(context!!)
-        .title(null, getString(R.string.alert))
-        .message(null, getString(R.string.dlg_msg_save_canvas))
-        .positiveButton(null, getString(R.string.yes)) {
-            saveCanvas(canvas.getBitmap())
-            inactiveBtnTemporary(iv_upload, anim_upload)
-        }
-        .negativeButton(null, getString(R.string.cancel)) {
-            inactiveBtnTemporary(iv_upload, anim_upload)
-        }
-        .cancelOnTouchOutside(false)
-
-    val backDialog = MaterialDialog(context!!)
-        .title(null, getString(R.string.alert))
-        .message(null, getString(R.string.dlg_msg_save_and_close_canvas))
-        .positiveButton(null, getString(R.string.yes)) {
-            saveCanvas(canvas.getBitmap())
-            requireActivity().finish()
-        }
-        .negativeButton(null, getString(R.string.just_close)) {
-            requireActivity().finish()
-        }
-        .cancelOnTouchOutside(false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -99,6 +61,45 @@ class PaintFragment : BaseFragment(), CanvasListener {
         // setup canvas
         canvas.setListener(this)
         canvas.changePenColor(Color.parseColor(colors[0]))
+
+        // setup dialog
+        val cleanDialog = MaterialDialog(context!!)
+            .title(null, getString(R.string.alert))
+            .message(null, getString(R.string.dlg_msg_canvas_delete))
+            .positiveButton(null, getString(R.string.delete)) {
+                canvas.clean()
+                inactiveBtnTemporary(iv_trashcan, anim_trashcan)
+                changeCurrentBtnStatus(iv_ink, anim_ink)
+                canvas.usePen()
+            }
+            .negativeButton(null, getString(R.string.cancel)) {
+                inactiveBtnTemporary(iv_trashcan, anim_trashcan)
+            }
+            .cancelOnTouchOutside(false)
+
+        val saveDialog = MaterialDialog(context!!)
+            .title(null, getString(R.string.alert))
+            .message(null, getString(R.string.dlg_msg_save_canvas))
+            .positiveButton(null, getString(R.string.yes)) {
+                saveCanvas(canvas.getBitmap())
+                inactiveBtnTemporary(iv_upload, anim_upload)
+            }
+            .negativeButton(null, getString(R.string.cancel)) {
+                inactiveBtnTemporary(iv_upload, anim_upload)
+            }
+            .cancelOnTouchOutside(false)
+
+        val backDialog = MaterialDialog(context!!)
+            .title(null, getString(R.string.alert))
+            .message(null, getString(R.string.dlg_msg_save_and_close_canvas))
+            .positiveButton(null, getString(R.string.yes)) {
+                saveCanvas(canvas.getBitmap())
+                requireActivity().finish()
+            }
+            .negativeButton(null, getString(R.string.just_close)) {
+                requireActivity().finish()
+            }
+            .cancelOnTouchOutside(false)
 
         // setup btn and animation
         setupAnimation()

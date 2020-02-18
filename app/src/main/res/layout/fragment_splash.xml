@@ -1,6 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/motion_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/grey_1"
+    app:layoutDescription="@xml/motion_scene"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TextView
+        android:id="@+id/tv_app"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textColor="@color/orange_1"
+        android:textSize="40sp" />
+
+    <ImageView
+        android:id="@+id/iv_mask_1"
+        android:layout_width="5dp"
+        android:layout_height="0dp"
+        android:background="@drawable/rec_gray_gradient" />
+
+    <ImageView
+        android:id="@+id/iv_mask_2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/rec_gray" />
+
+    <ImageView
+        android:id="@+id/iv_pen"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/ic_paint_brush" />
+</androidx.constraintlayout.motion.widget.MotionLayout>
